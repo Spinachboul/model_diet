@@ -61,7 +61,7 @@ pip-audit .
 pip-audit --local --skip-editable
 ```
 
-The local audit skips the editable checkout itself, which has no production PyPI release; its installed dependencies are still audited.
+The local audit skips this repository's editable installation; it still audits installed non-editable dependencies. `pip-audit .` separately checks the current project requirements against the vulnerability database.
 
 Validate the package and documentation when their respective files change:
 

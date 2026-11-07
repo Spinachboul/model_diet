@@ -1,8 +1,12 @@
 # Changelog
 
-This changelog records user-visible changes to Model Diet. Version 0.1.0 is the initial release candidate and has not been marked as published here.
+This changelog records user-visible changes to Model Diet. Version 0.1.0 was published on production PyPI on November 7, 2026.
 
-## [0.1.0] - Unreleased
+## [Unreleased]
+
+## [0.1.0] - 2026-11-07
+
+Initial production release.
 
 ### Added
 

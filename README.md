@@ -1,54 +1,43 @@
 # Model Diet
 
-**Profile the inference cost of a fitted Python model before deployment.**
+**A lightweight Python library for profiling inference latency and runtime characteristics of fitted machine learning models.**
 
 [![CI](https://github.com/modeldiet/modeldiet/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/modeldiet/modeldiet/actions/workflows/ci.yml)
 [![Documentation](https://github.com/modeldiet/modeldiet/actions/workflows/docs.yml/badge.svg?branch=master)](https://github.com/modeldiet/modeldiet/actions/workflows/docs.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://github.com/modeldiet/modeldiet/blob/master/pyproject.toml)
 [![License: MIT](https://img.shields.io/github/license/modeldiet/modeldiet)](LICENSE)
 
-Model Diet helps ML engineers understand how an already-fitted model behaves at inference time. Give it representative tabular inputs; it returns structured measurements you can inspect or export as JSON and Markdown.
+Model Diet helps ML engineers inspect how an already-fitted model behaves at inference time. Give it representative tabular inputs; it returns structured measurements you can inspect or export as JSON and Markdown. It is a local profiler, not a serving benchmark or model-optimization platform.
 
 ## Install
 
-**Model Diet is not currently published on production PyPI.** PyPI's [package metadata endpoint](https://pypi.org/pypi/modeldiet/json) returned 404 when checked on November 7, 2026, so `pip install modeldiet` is not a verified installation method. Install from the source repository instead:
+Install the core package from production PyPI:
 
 ```bash
-git clone https://github.com/modeldiet/modeldiet.git
-cd modeldiet
-python -m pip install .
+python -m pip install modeldiet
 ```
 
-The core package requires Python 3.11+ and depends on NumPy and psutil. It does not require scikit-learn or XGBoost; you can profile a compatible model of your own without those libraries.
+The core package supports Python 3.11 or later and depends on NumPy and psutil. It does not require scikit-learn or XGBoost; you can profile a compatible fitted model of your own without those libraries.
 
-The copy-and-run quickstart below uses scikit-learn. Install the demo extra from the repository checkout to run it:
+The copy-and-run quickstart below trains a scikit-learn model. Install the demo extra to run it:
 
 ```bash
-python -m pip install ".[demo]"
+python -m pip install "modeldiet[demo]"
 ```
 
 The optional benchmark tools have separate extras:
 
-| Install from the repository checkout | Includes | Use |
+| Install command | Includes | Use |
 | --- | --- | --- |
-| `python -m pip install ".[benchmark]"` | pandas and scikit-learn | Logistic Regression and Random Forest benchmark runs |
-| `python -m pip install ".[benchmark-xgboost]"` | pandas, scikit-learn, and XGBoost | XGBoost benchmark runs |
-| `python -m pip install ".[demo]"` | pandas, scikit-learn, and XGBoost | All documented demo examples and benchmark types |
+| `python -m pip install "modeldiet[benchmark]"` | pandas and scikit-learn | Logistic Regression and Random Forest benchmark runs |
+| `python -m pip install "modeldiet[benchmark-xgboost]"` | pandas, scikit-learn, and XGBoost | XGBoost benchmark runs |
+| `python -m pip install "modeldiet[demo]"` | pandas, scikit-learn, and XGBoost | Demo quickstart and all benchmark types |
 
-The test release `0.1.0` is available from [TestPyPI](https://test.pypi.org/project/modeldiet/), but it is not a production release. To try it, let pip use TestPyPI for Model Diet and production PyPI for its dependencies:
-
-```bash
-python -m pip install \
-  --index-url https://test.pypi.org/simple/ \
-  --extra-index-url https://pypi.org/simple/ \
-  "modeldiet[demo]==0.1.0"
-```
-
-Use the source installation above for development from the repository.
+For development from a source checkout, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Quickstart
 
-This trains a small Random Forest, profiles it with the default latency measurement, and writes both report formats. It requires the `demo` extra.
+This trains a small Random Forest, profiles it with the default latency measurement, and writes both report formats. It requires the `demo` extra. In your application, pass an already-fitted model and representative inputs compatible with its `predict()` method.
 
 ```python
 from pathlib import Path
@@ -79,7 +68,7 @@ Use representative inputs with the feature layout and preprocessing your fitted 
 
 ## Example result
 
-Below is an abbreviated view of one run of the quickstart above in a local development environment. The latency values are machine- and workload-specific examples, not performance claims or expected results. Your values will differ.
+Below is an abbreviated result from one run of the quickstart above using the production wheel in a local environment. These observed latency values are machine- and workload-specific; they are illustrative only, not typical results or a performance claim. Your values will differ.
 
 ```text
 model_class: RandomForestClassifier
@@ -87,11 +76,11 @@ input_type: ndarray
 sample_count: 100
 feature_count: 5
 
-latency.mean    0.633 ms
-latency.p50     0.609 ms
-latency.p90     0.659 ms
-latency.p95     0.676 ms
-latency.p99     0.754 ms
+latency.mean    0.749 ms
+latency.p50     0.795 ms
+latency.p90     0.834 ms
+latency.p95     0.853 ms
+latency.p99     0.868 ms
 latency.sample_count  100 count
 
 environment: optional metadata included
@@ -112,7 +101,7 @@ By default, `profile()` runs only `LatencyMeasurement`: it makes one warmup pred
 | `LatencyMeasurement` | `latency.mean`, `latency.p50`, `latency.p90`, `latency.p95`, `latency.p99` | ms | Mean and percentiles of single-row prediction durations. `latency.sample_count` is a count. |
 | `TracedAllocationMeasurement` | `python_traced.peak_allocation` | MiB | Peak Python-traced allocations during a separate inference pass; native allocations not tracked by `tracemalloc` are excluded. |
 | `ProcessRSSMeasurement` | `process_rss.before`, `process_rss.after`, `process_rss.delta` | MiB | Whole-process RSS endpoint snapshots and their difference; not model-only memory or peak RSS. |
-| `SerializationMeasurement` | `pickle.size` | MiB | Size of the model's Python pickle representation; not a guarantee that pickle is safe or portable. |
+| `SerializationMeasurement` | `pickle.size` | MiB | Size of the model's Python pickle representation; it can differ from its deployed artifact size and does not mean pickle is safe or portable. |
 
 You can select other strategies from `modeldiet.profiling`. Supplying `measurements=[...]` replaces the default list, so include `LatencyMeasurement()` explicitly if you want latency alongside other measurements. Each strategy makes its own pass over the input.
 
@@ -138,7 +127,7 @@ from modeldiet.benchmark import run_repeated_benchmark
 run_repeated_benchmark("lr", repetitions=1, output_dir="benchmark-output")
 ```
 
-Use the `[benchmark]` extra for Logistic Regression or Random Forest, and `[benchmark-xgboost]` for XGBoost. Unlike core `profile()`, the demonstration benchmark reports accuracy because it has labels for its bundled dataset. See the [benchmark guide](https://modeldiet.github.io/modeldiet/application/#optional-benchmark-runner) for details.
+Use the `modeldiet[benchmark]` extra for Logistic Regression or Random Forest, and `modeldiet[benchmark-xgboost]` for XGBoost. Unlike core `profile()`, the demonstration benchmark reports accuracy because it has labels for its bundled dataset. See the [benchmark guide](https://modeldiet.github.io/modeldiet/application/#optional-benchmark-runner) for details.
 
 ## Limitations
 
@@ -150,6 +139,9 @@ Model Diet reports inference measurements, not deployment-wide guarantees. In pa
 - Concurrent-serving capacity.
 - End-to-end API or network latency.
 - Peak process RSS: RSS values are before-and-after snapshots.
+- The deployed artifact size: the serialization measurement reports pickle representation size only.
+- Built-in adapters for PyTorch, TensorFlow, or ONNX Runtime.
+- Automatic model comparisons or optimization recommendations.
 
 Results depend on the model, input data, software stack, machine, and background load. Compare runs under similar conditions and treat these measurements as local observations, not service-level guarantees.
 
@@ -160,6 +152,11 @@ Results depend on the model, input data, software stack, machine, and background
 - [Measurement definitions](https://modeldiet.github.io/modeldiet/measurements/)
 - [Public API and compatibility policy](https://modeldiet.github.io/modeldiet/api/)
 - [Documentation hosting and local build](https://modeldiet.github.io/modeldiet/hosting/)
+- [Contributing guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Changelog](CHANGELOG.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Governance](GOVERNANCE.md)
 
 ## Architecture overview
 

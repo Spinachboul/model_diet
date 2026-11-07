@@ -26,18 +26,16 @@ The model must have a callable `predict(X)` method. Model Diet supplies each row
 
 ## Install
 
-Model Diet is not yet published on production PyPI. Clone the repository and install from the source checkout:
+Install the core package from production PyPI:
 
 ```bash
-git clone https://github.com/modeldiet/modeldiet.git
-cd modeldiet
-python -m pip install .
+python -m pip install modeldiet
 ```
 
-The scikit-learn example requires the optional demo extra, installed from the checkout:
+The scikit-learn example requires the optional demo extra:
 
 ```bash
-python -m pip install ".[demo]"
+python -m pip install "modeldiet[demo]"
 ```
 
 See the repository [README](https://github.com/modeldiet/modeldiet/blob/master/README.md) for the project overview and the [contribution guide](https://github.com/modeldiet/modeldiet/blob/master/CONTRIBUTING.md) for development setup.

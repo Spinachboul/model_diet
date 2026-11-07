@@ -6,23 +6,21 @@ See the [API reference](api.md) for supported import paths and compatibility exp
 
 ## Installation
 
-Model Diet requires Python 3.11 or later. It is not yet published on production PyPI; install it from a source checkout:
+Model Diet requires Python 3.11 or later. Install the core package from production PyPI:
 
 ```bash
-git clone https://github.com/modeldiet/modeldiet.git
-cd modeldiet
-python -m pip install .
+python -m pip install modeldiet
 ```
 
-Install the optional demo dependencies from that checkout to use the scikit-learn examples in this guide:
+Install the optional demo dependencies to use the scikit-learn examples in this guide:
 
 ```bash
-python -m pip install ".[demo]"
+python -m pip install "modeldiet[demo]"
 ```
 
 ## Optional benchmark runner
 
-The benchmark runner loads the bundled dataset as a pandas DataFrame. Install `.[benchmark]` from the checkout for its Logistic Regression or Random Forest workflows; `.[benchmark-xgboost]` adds XGBoost. Both extras include pandas. The existing `.[demo]` extra includes pandas, scikit-learn, and XGBoost.
+The benchmark runner loads the bundled dataset as a pandas DataFrame. Install `modeldiet[benchmark]` for its Logistic Regression or Random Forest workflows; `modeldiet[benchmark-xgboost]` adds XGBoost. Both extras include pandas. The `modeldiet[demo]` extra includes pandas, scikit-learn, and XGBoost.
 
 ```python
 from modeldiet.benchmark import run_repeated_benchmark

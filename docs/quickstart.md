@@ -4,12 +4,10 @@ This walkthrough installs the optional scikit-learn dependency, trains a small c
 
 ## 1. Install
 
-Model Diet supports Python 3.11 or later. It is not yet published on production PyPI. Clone the repository and install its demo extra from the source checkout:
+Model Diet supports Python 3.11 or later. Install the demo extra from production PyPI:
 
 ```bash
-git clone https://github.com/modeldiet/modeldiet.git
-cd modeldiet
-python -m pip install ".[demo]"
+python -m pip install "modeldiet[demo]"
 ```
 
 ## 2. Save and run this example
